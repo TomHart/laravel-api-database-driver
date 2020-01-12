@@ -2,11 +2,8 @@
 
 namespace TomHart\Database;
 
-
 use Illuminate\Database\Connection;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
-use PHPUnit\Framework\MockObject\Api;
 use TomHart\Database\Database\ApiConnection;
 
 class ApiDriverServiceProvider extends ServiceProvider
@@ -16,10 +13,10 @@ class ApiDriverServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         Connection::resolverFor('api', static function ($connection, $database, $prefix, $config) {
-            if(app()->has(ApiConnection::class)){
+            if (app()->has(ApiConnection::class)) {
                 return app(ApiConnection::class);
             }
 
@@ -32,7 +29,7 @@ class ApiDriverServiceProvider extends ServiceProvider
     /**
      * Boot the service.
      */
-    public function boot()
+    public function boot(): void
     {
         $this->publishes([
             __DIR__ . '/../config/api-database.php' => config_path('api-database.php'),

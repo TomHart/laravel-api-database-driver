@@ -36,12 +36,12 @@ class ApiConnection extends Connection
 
     /**
      * Extract what key in the response the data is held in (if applicable).
-     * @param $query
+     * @param string $query
      * @return string|null
      */
-    private function extractJsonKey(&$query): ?string
+    private function extractJsonKey(string &$query): ?string
     {
-        preg_match('/\@([a-zA-Z]+)/', $query, $matches);
+        preg_match('/@([a-zA-Z]+)/', $query, $matches);
         $match = array_shift($matches);
 
         if ($match) {
@@ -53,15 +53,14 @@ class ApiConnection extends Connection
     }
 
     /**
-     * @inheritDoc
      * @param string $query
-     * @param array $bindings
+     * @param mixed[] $bindings
      * @param bool $useReadPdo
-     * @return array|mixed
+     * @return mixed[]
      */
     public function select($query, $bindings = [], $useReadPdo = true)
     {
-        return $this->run($query, $bindings, function ($query, $bindings) use ($useReadPdo) {
+        return $this->run($query, $bindings, function ($query) {
             $key = $this->extractJsonKey($query);
 
             $url = $this->getApiHost() . $query;
@@ -79,7 +78,13 @@ class ApiConnection extends Connection
     }
 
 
-    private function getResponse(Client $client, string $url){
+    /**
+     * @param Client $client
+     * @param string $url
+     * @return mixed[]
+     */
+    private function getResponse(Client $client, string $url): array
+    {
         $response = $client->request('GET', $url, [
             'headers' => config('api-database.headers')
         ]);
@@ -87,7 +92,7 @@ class ApiConnection extends Connection
         $body = $response->getBody()->getContents();
         $json = \GuzzleHttp\json_decode($body, true);
 
-        if($this->isJsonResponse($json) && $json['current_page'] < $json['last_page']){
+        if ($this->isPaginatedResponse($json) && $json['current_page'] < $json['last_page']) {
             $json2 = $this->getResponse($client, $json['next_page_url']);
 
             $json['data'] = array_merge($json['data'], $json2['data']);
@@ -99,7 +104,12 @@ class ApiConnection extends Connection
     }
 
 
-    private function isJsonResponse(array $json): bool
+    /**
+     * Is the JSON responses a paginatable one?
+     * @param mixed[] $json
+     * @return bool
+     */
+    private function isPaginatedResponse(array $json): bool
     {
         return empty(array_diff([
             'current_page',

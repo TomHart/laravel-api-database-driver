@@ -2,17 +2,19 @@
 
 namespace TomHart\Database\Database\Query\Grammars;
 
-
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Grammars\Grammar;
 
 class ApiGrammar extends Grammar
 {
 
+    /**
+     * @var string[]
+     */
     private $defaultQueryString = [];
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getDefaultQueryString(): array
     {
@@ -20,7 +22,7 @@ class ApiGrammar extends Grammar
     }
 
     /**
-     * @param array $defaultQueryString
+     * @param string[] $defaultQueryString
      * @return ApiGrammar
      */
     public function setDefaultQueryString(array $defaultQueryString): self
@@ -34,7 +36,7 @@ class ApiGrammar extends Grammar
      * @param Builder $query
      * @return string
      */
-    public function compileSelect(Builder $query)
+    public function compileSelect(Builder $query): string
     {
         $queryString = $this->getDefaultQueryString();
         if ($query->limit) {
@@ -55,9 +57,9 @@ class ApiGrammar extends Grammar
 
     /**
      * Adds a where clause to the query string.
-     * @param array $where
-     * @param array $queryString
-     * @return array
+     * @param string[] $where
+     * @param mixed[] $queryString
+     * @return string[]
      */
     private function addWhereClause(array $where, array $queryString): array
     {
